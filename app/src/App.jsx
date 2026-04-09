@@ -1,19 +1,31 @@
-function Contoh(){
+function Judul({nama}){
     return <div>
-        <h1>Judul Berita</h1>
+        <h1>Agent {nama}</h1>
     </div>
 }
 
-function Contoh2(){
+function Isi(){
     return <div>
-        <h1>Judul Berita</h1>
-        <p>isi berita</p>
+        <p>Septian dan Rayantol sudah sangat terpojok karena kemunculan agent bali dan agent bandung secara tiba tiba</p>
+        <p>ditengah itu tiba tiba CEO Basreng muncul, ikut merusuh. Agent CEO Basreng berubah ke wujdu silumannya</p>
+        <p>tapi nampaknya tidak akan mudah di hentikan, Septian akhrirnya menggunakan kekuatan terakhirnya yaitu memanggik</p>
+        <p>siluman dongkrak</p>
     </div>
 }
 
+function Artikel({nama}){
+    return <div>
+        <Judul nama = {nama}/>
+        <Isi/>
+    </div>
+}
 
 function App(){
-    return <h1>Halo</h1>
+    return  <div>
+        <Artikel nama = "Septian"/>
+        <Artikel nama = "Rayantol"/>
+        <Artikel nama = "CEO Basreng"/>
+    </div>
 }
 
 export default App;
