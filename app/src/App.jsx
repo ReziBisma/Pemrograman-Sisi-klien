@@ -1,47 +1,42 @@
 import React from "react";
+import Input from "@/Pages/Auth/Components/Input";
+import Label from "@/Pages/Auth/Components/Label";
+import Button from "@/Pages/Auth/Components/Button";
+import Link from "@/Pages/Auth/Components/Link";
+import Card from "@/Pages/Auth/Components/Card";
+import Heading from "@/Pages/Auth/Components/Heading";
+import Form from "@/Pages/Auth/Components/Form";
+import AuthLayout from "@/Pages/Auth/AuthLayout";
 
-const App = () => {
+const Login = () => {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-3xl font-semibold text-center text-blue-600 mb-6">Login</h2>
-        <form className="space-y-4">
+    <AuthLayout>
+      <Card>
+        <Heading as="h2">Login</Heading>
+        <Form>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="Masukkan email"
-              className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
+            <Label htmlFor="email">Email</Label>
+            <Input type="email" name="email" placeholder="Masukkan email" required />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              placeholder="Masukkan password"
-              className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-            />
+            <Label htmlFor="password">Password</Label>
+            <Input type="password" name="password" placeholder="Masukkan password" required />
           </div>
           <div className="flex justify-between items-center">
             <label className="flex items-center">
               <input type="checkbox" className="mr-2" />
               <span className="text-sm text-gray-600">Ingat saya</span>
             </label>
-            <a href="#" className="text-sm text-blue-500 hover:underline">Lupa password?</a>
+            <Link href="#" className="text-sm">Lupa password?</Link>
           </div>
-          <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Login</button>
-        </form>
+          <Button type="submit" className="w-full">Login</Button>
+        </Form>
         <p className="text-sm text-center text-gray-600 mt-4">
-          Belum punya akun?
-          <a href="#" className="text-blue-500 hover:underline">Daftar</a>
+          Belum punya akun? <Link href="#">Daftar</Link>
         </p>
-      </div>
-    </div>
+      </Card>
+    </AuthLayout>
   );
 };
 
-export default App;
+export default Login;
