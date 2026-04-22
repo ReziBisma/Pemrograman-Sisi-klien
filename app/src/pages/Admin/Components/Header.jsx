@@ -1,4 +1,12 @@
 import Button from "@/Pages/Admin/Components/Button";
+import { confirmLogout } from "@/Utils/Helpers/SwalHelpers";
+
+const handleLogout = () => {
+  confirmLogout(() => {
+    localStorage.removeItem("user");
+    location.href = "/";
+  });
+};
 
 const Header = () => {
   const toggleProfileMenu = () => {
@@ -19,8 +27,15 @@ const Header = () => {
             id="profileMenu"
             className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg py-2 hidden"
           >
-            <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
-            <button onClick={() => alert("Logout berhasil!")} className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</button>
+            <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+              Profile
+            </a>
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>

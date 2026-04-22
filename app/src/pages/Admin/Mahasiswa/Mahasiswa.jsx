@@ -7,6 +7,12 @@ import Heading from "@/Pages/Admin/Components/Heading";
 import Button from "@/Pages/Admin/Components/Button";
 
 import MahasiswaModal from "./MahasiswaModal";
+import {
+  confirmDelete,
+  confirmUpdate,
+} from "@/Utils/Helpers/SwalHelpers";
+
+import { toastSuccess } from "@/Utils/Helpers/ToastHelpers";
 
 const Mahasiswa = () => {
   const [mahasiswa, setMahasiswa] = useState([]);
@@ -24,6 +30,25 @@ const Mahasiswa = () => {
     setTimeout(() => fetchMahasiswa(), 500);
   }, []);
 
+  // ✅ CREATE
+const addMahasiswa = (data) => {
+  setMahasiswa([...mahasiswa, { ...data, status: true }]);
+};
+
+// ✅ UPDATE
+const updateMahasiswa = (nim, data) => {
+  setMahasiswa(
+    mahasiswa.map((m) =>
+      m.nim === nim ? { ...m, ...data } : m
+    )
+  );
+};
+
+// ✅ DELETE
+const deleteMahasiswa = (nim) => {
+  setMahasiswa(mahasiswa.filter((m) => m.nim !== nim));
+};
+
   // ✅ TAMBAH
   const handleAdd = () => {
     setSelectedData(null);
@@ -37,38 +62,46 @@ const Mahasiswa = () => {
   };
 
   // ✅ DELETE
-  const handleDelete = (nim) => {
-    if (confirm("Yakin ingin hapus data?")) {
-      setMahasiswa(mahasiswa.filter((m) => m.nim !== nim));
-    }
-  };
+ const handleDelete = (nim) => {
+  confirmDelete(() => {
+    deleteMahasiswa(nim);
+    toastSuccess("Data berhasil dihapus");
+  });
+};
 
   // ✅ SUBMIT (CREATE + UPDATE)
   const handleSubmit = (formData) => {
+    // VALIDASI
+    if (!formData.nim || !formData.nama) {
+      toastError("NIM dan Nama wajib diisi");
+      return;
+    }
+
+    // CEK DUPLIKAT (kecuali saat edit data yg sama)
     const isDuplicate = mahasiswa.some(
       (m) => m.nim === formData.nim && m !== selectedData
     );
 
     if (isDuplicate) {
-      alert("NIM sudah digunakan!");
+      toastError("NIM sudah terdaftar!");
       return;
     }
 
+    // ✅ UPDATE
     if (selectedData) {
-      // UPDATE
-      if (confirm("Yakin update data?")) {
-        setMahasiswa(
-          mahasiswa.map((m) =>
-            m.nim === selectedData.nim ? formData : m
-          )
-        );
-      }
-    } else {
-      // CREATE
-      setMahasiswa([...mahasiswa, formData]);
+      confirmUpdate(() => {
+        updateMahasiswa(selectedData.nim, formData);
+        toastSuccess("Data berhasil diperbarui");
+        setModalOpen(false);
+        setSelectedData(null);
+      });
+    } 
+    // ✅ CREATE
+    else {
+      addMahasiswa(formData);
+      toastSuccess("Data berhasil ditambahkan");
+      setModalOpen(false);
     }
-
-    setModalOpen(false);
   };
 
   return (

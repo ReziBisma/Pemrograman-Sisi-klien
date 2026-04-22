@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
-import Button from "@/Pages/Admin/Components/Button";
+import { useEffect, useState } from "react";
 
-export default function MahasiswaModal({
+const MahasiswaModal = ({
   onClose,
   onSubmit,
-  initialData,
-}) {
+  initialData, // ✅ samakan dengan parent
+}) => {
   const [form, setForm] = useState({
     nim: "",
     nama: "",
@@ -14,15 +13,20 @@ export default function MahasiswaModal({
 
   const [error, setError] = useState("");
 
+  // ✅ SET DATA (EDIT / CREATE)
   useEffect(() => {
     if (initialData) {
       setForm(initialData);
     } else {
-      setForm({ nim: "", nama: "", status: true });
+      setForm({
+        nim: "",
+        nama: "",
+        status: true,
+      });
     }
   }, [initialData]);
 
-  // HANDLE CHANGE
+  // ✅ HANDLE CHANGE
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -32,7 +36,7 @@ export default function MahasiswaModal({
     });
   };
 
-  // HANDLE SUBMIT
+  // ✅ SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -42,21 +46,30 @@ export default function MahasiswaModal({
     }
 
     setError("");
+
+    // ❗ hanya kirim data, JANGAN tutup modal di sini
     onSubmit(form);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
-        <h3 className="mb-4 text-lg font-bold">
-          {initialData ? "Edit" : "Tambah"} Mahasiswa
-        </h3>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white w-96 rounded-xl shadow-lg p-6">
+        
+        {/* TITLE */}
+        <h2 className="text-xl font-semibold mb-2">
+          {initialData ? "Edit Mahasiswa" : "Tambah Mahasiswa"}
+        </h2>
 
+        {/* ERROR */}
         {error && (
-          <p className="mb-3 text-sm text-red-500">{error}</p>
+          <p className="text-red-500 text-sm mb-3">
+            {error}
+          </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
           {/* NIM */}
           <input
             type="text"
@@ -64,8 +77,8 @@ export default function MahasiswaModal({
             placeholder="NIM"
             value={form.nim}
             onChange={handleChange}
-            disabled={initialData}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+            disabled={initialData} // ✅ disable saat edit
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           {/* NAMA */}
@@ -75,7 +88,7 @@ export default function MahasiswaModal({
             placeholder="Nama"
             value={form.nama}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           {/* STATUS */}
@@ -90,21 +103,26 @@ export default function MahasiswaModal({
           </label>
 
           {/* BUTTON */}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit">
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
               Simpan
-            </Button>
+            </button>
 
-            <Button
+            <button
               type="button"
-              variant="secondary"
               onClick={onClose}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
             >
               Batal
-            </Button>
+            </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
+};
+
+export default MahasiswaModal;
