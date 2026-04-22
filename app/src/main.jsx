@@ -41,17 +41,11 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: <Dashboard />,
       },
-      {
+            {
         path: "mahasiswa",
         children: [
-          {
-            index: true,
-            element: <Mahasiswa />,
-          },
-          {
-            path: ":nim",
-            element: <MahasiswaDetail />,
-          },
+          { index: true, element: <Mahasiswa /> },
+          { path: ":nim", element: <MahasiswaDetail /> },
         ],
       },
     ],
