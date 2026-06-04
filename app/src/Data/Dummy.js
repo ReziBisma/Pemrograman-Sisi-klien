@@ -9,18 +9,22 @@ export const dummyUser = {
 export const mahasiswaList = [
   {
     nim: "20211001",
-    nama: "Budi Santoso",
+    nama: "Siluman Cimol",
+    status: true,
   },
   {
     nim: "20211002",
-    nama: "Siti Aminah",
+    nama: "Bunda Marian",
+    status: true,
   },
   {
     nim: "20211003",
-    nama: "Ahmad Fauzi",
+    nama: "CEO Basreng",
+    status: true,
   },
     {
     nim: "20211004",
     nama: "Rayantol",
+    status: false,
   },
 ];
