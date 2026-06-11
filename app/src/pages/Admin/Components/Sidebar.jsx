@@ -1,6 +1,16 @@
 import { NavLink } from "react-router-dom";
+import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 
 const Sidebar = () => {
+  const { user } = useAuthStateContext();
+
+  {user.permission.includes("dashboard.page") && (
+    <NavLink to="/admin/dashboard">Dashboard</NavLink>
+  )}
+
+  {user.permission.includes("mahasiswa.page") && (
+    <NavLink to="/admin/mahasiswa">Mahasiswa</NavLink>
+  )}
   return (
     <aside className="bg-blue-800 text-white min-h-screen transition-all duration-300 w-20 lg:w-64">
       <div className="p-4 border-b border-blue-700">

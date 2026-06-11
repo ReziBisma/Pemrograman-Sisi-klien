@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-
+import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 const MahasiswaTable = ({ mahasiswa, openEditModal, onDelete }) => {
+  const { user } = useAuthStateContext();
   return (
     <table className="w-full text-sm text-gray-700">
       <thead className="bg-blue-600 text-white">
@@ -33,19 +34,22 @@ const MahasiswaTable = ({ mahasiswa, openEditModal, onDelete }) => {
                 Detail
               </Link>
 
+              {user.permission.includes("mahasiswa.update") && (
               <button
                 onClick={() => openEditModal(mhs)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
               >
                 Edit
               </button>
-
+              )}
+              {user.permission.includes("mahasiswa.delete") && (
               <button
                 onClick={() => onDelete(mhs.id)}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
               >
                 Hapus
               </button>
+              )}
             </td>
           </tr>
         ))}

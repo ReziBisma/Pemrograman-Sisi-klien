@@ -1,5 +1,6 @@
 import Button from "@/Pages/Admin/Components/Button";
 import { confirmLogout } from "@/Utils/Helpers/SwalHelpers";
+import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 
 const handleLogout = () => {
   confirmLogout(() => {
@@ -9,14 +10,18 @@ const handleLogout = () => {
 };
 
 const Header = () => {
+  
   const toggleProfileMenu = () => {
     const menu = document.getElementById("profileMenu");
     if (menu) menu.classList.toggle("hidden");
   };
 
+  const { user } = useAuthStateContext();
+
   return (
     <header className="bg-white shadow-md">
       <div className="flex justify-between items-center px-6 py-4">
+        <h1>Login sebagai: <strong>{user?.role}</strong></h1>
         <h1 className="text-2xl font-semibold text-gray-800">Mahasiswa</h1>
         <div className="relative">
           <Button

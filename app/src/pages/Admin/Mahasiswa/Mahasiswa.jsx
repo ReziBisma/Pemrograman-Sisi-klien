@@ -22,8 +22,10 @@ import {
   updateMahasiswa,
   deleteMahasiswa,
 } from "@/Utils/Apis/MahasiswaApi";
+import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 
 const Mahasiswa = () => {
+  const { user } = useAuthStateContext();
   const [mahasiswa, setMahasiswa] = useState([]);
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -101,16 +103,18 @@ const Mahasiswa = () => {
             Daftar Mahasiswa
           </Heading>
 
-          <Button onClick={openAddModal}>
-            + Tambah Mahasiswa
-          </Button>
+          {user.permission.includes("mahasiswa.create") && (
+            <Button onClick={openAddModal}>+ Tambah Mahasiswa</Button>
+          )}
         </div>
 
-        <MahasiswaTable
-          mahasiswa={mahasiswa}
-          openEditModal={openEditModal}
-          onDelete={handleDelete}
-        />
+        {user?.permission?.includes("mahasiswa.read") && (
+          <MahasiswaTable
+            mahasiswa={mahasiswa}
+            openEditModal={openEditModal}
+            onDelete={handleDelete}
+          />
+        )}
       </Card>
 
       <MahasiswaModal

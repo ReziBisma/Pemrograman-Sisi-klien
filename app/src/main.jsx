@@ -19,6 +19,7 @@ import Dashboard from "@/Pages/Admin/Dashboard/Dashboard";
 import Mahasiswa from "@/Pages/Admin/Mahasiswa/Mahasiswa";
 import MahasiswaDetail from "@/Pages/Admin/MahasiswaDetail/MahasiswaDetail";
 import PageNotFound from "@/Pages/Error/PageNotFound";
+import { AuthProvider } from "@/Pages/Auth/AuthContext";
 
 const router = createBrowserRouter([
   {
@@ -70,9 +71,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <>
+      <AuthProvider>
       <Toaster position="top-right" />
       <RouterProvider router={router} />
-    </>
+    </AuthProvider>
   </React.StrictMode>,
 );
