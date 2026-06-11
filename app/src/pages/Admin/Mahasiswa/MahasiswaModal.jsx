@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
+import Button from "@/Pages/Admin/Components/Button";
+import Input from "@/Pages/Auth/Components/Input";
+import Label from "@/Pages/Auth/Components/Label";
+import { toastError } from "@/Utils/Helpers/ToastHelpers";
 
 const MahasiswaModal = ({
+  isModalOpen,
   onClose,
   onSubmit,
-  initialData, // ✅ samakan dengan parent
+  selectedMahasiswa,
 }) => {
   const [form, setForm] = useState({
     nim: "",
@@ -11,12 +16,14 @@ const MahasiswaModal = ({
     status: true,
   });
 
-  const [error, setError] = useState("");
-
-  // ✅ SET DATA (EDIT / CREATE)
+  // isi form saat edit / reset saat tambah
   useEffect(() => {
-    if (initialData) {
-      setForm(initialData);
+    if (selectedMahasiswa) {
+      setForm({
+        nim: selectedMahasiswa.nim || "",
+        nama: selectedMahasiswa.nama || "",
+        status: selectedMahasiswa.status ?? true,
+      });
     } else {
       setForm({
         nim: "",
@@ -24,101 +31,101 @@ const MahasiswaModal = ({
         status: true,
       });
     }
-  }, [initialData]);
+  }, [selectedMahasiswa, isModalOpen]);
 
-  // ✅ HANDLE CHANGE
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
-  // ✅ SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.nim || !form.nama) {
-      setError("Semua field wajib diisi!");
+    if (!form.nim.trim() || !form.nama.trim()) {
+      toastError("Data belum lengkap");
       return;
     }
 
-    setError("");
-
-    // ❗ hanya kirim data, JANGAN tutup modal di sini
     onSubmit(form);
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-96 rounded-xl shadow-lg p-6">
-        
-        {/* TITLE */}
-        <h2 className="text-xl font-semibold mb-2">
-          {initialData ? "Edit Mahasiswa" : "Tambah Mahasiswa"}
-        </h2>
+  if (!isModalOpen) return null;
 
-        {/* ERROR */}
-        {error && (
-          <p className="text-red-500 text-sm mb-3">
-            {error}
-          </p>
-        )}
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-lg font-semibold">
+            {selectedMahasiswa ? "Edit Mahasiswa" : "Tambah Mahasiswa"}
+          </h2>
+
+          <button
+            onClick={onClose}
+            className="text-gray-600 hover:text-red-500 text-xl"
+          >
+            &times;
+          </button>
+        </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+
           {/* NIM */}
-          <input
-            type="text"
-            name="nim"
-            placeholder="NIM"
-            value={form.nim}
-            onChange={handleChange}
-            disabled={initialData} // ✅ disable saat edit
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <div>
+            <Label htmlFor="nim">NIM</Label>
+            <Input
+              type="text"
+              name="nim"
+              value={form.nim}
+              onChange={handleChange}
+              readOnly={!!selectedMahasiswa}
+              placeholder="Masukkan NIM"
+            />
+          </div>
 
           {/* NAMA */}
-          <input
-            type="text"
-            name="nama"
-            placeholder="Nama"
-            value={form.nama}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <div>
+            <Label htmlFor="nama">Nama</Label>
+            <Input
+              type="text"
+              name="nama"
+              value={form.nama}
+              onChange={handleChange}
+              placeholder="Masukkan Nama"
+            />
+          </div>
 
           {/* STATUS */}
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="status"
-              checked={form.status}
-              onChange={handleChange}
-            />
-            Aktif
-          </label>
+          <div>
+            <Label>Status</Label>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                name="status"
+                checked={form.status}
+                onChange={handleChange}
+              />
+              <span>{form.status ? "Aktif" : "Tidak Aktif"}</span>
+            </div>
+          </div>
 
           {/* BUTTON */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-            >
-              Simpan
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
-            >
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Batal
-            </button>
+            </Button>
+
+            <Button type="submit">
+              Simpan
+            </Button>
           </div>
+
         </form>
       </div>
     </div>

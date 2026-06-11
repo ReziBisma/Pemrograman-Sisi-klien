@@ -13,6 +13,8 @@ import { toastSuccess, toastError } from "@/Utils/Helpers/ToastHelpers";
 
 import { dummyUser } from "@/Data/Dummy";
 
+import { login } from "@/Utils/Apis/AuthApi";
+
 const Login = () => {
   const navigate = useNavigate();
 
@@ -25,18 +27,19 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const { email, password } = form;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const { email, password } = form;
 
-    if (email === dummyUser.email && password === dummyUser.password) {
-      localStorage.setItem("user", JSON.stringify(dummyUser));
-      toastSuccess("Login berhasil!");
-      navigate("/admin/dashboard");
-    } else {
-      toastError("Email atau password salah!");
-    }
-  };
+  try {
+    const user = await login(email, password);
+    localStorage.setItem("user", JSON.stringify(user));
+    toastSuccess("Login berhasil");
+    navigate("/admin/dashboard");
+  } catch (err) {
+    toastError(err.message);
+  }
+};
 
   return (
     <Card className="max-w-md">

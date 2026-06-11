@@ -1,21 +1,39 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Card from "@/Pages/Admin/Components/Card";
 import Heading from "@/Pages/Admin/Components/Heading";
 
-import { mahasiswaList } from "@/Data/Dummy";
+import { getMahasiswa } from "@/Utils/Apis/MahasiswaApi";
+import { toastError } from "@/Utils/Helpers/ToastHelpers";
 
 const MahasiswaDetail = () => {
-  const { nim } = useParams();
+  const { id } = useParams();
 
-  const mahasiswa = mahasiswaList.find((m) => m.nim === nim);
+  const [mahasiswa, setMahasiswa] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMahasiswa();
+  }, [id]);
+
+  const fetchMahasiswa = async () => {
+    try {
+      const res = await getMahasiswa(id);
+      setMahasiswa(res.data);
+    } catch (err) {
+      toastError("Gagal mengambil data mahasiswa");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <p className="text-center">Memuat data...</p>;
+  }
 
   if (!mahasiswa) {
-    return (
-      <p className="text-red-600">
-        Data mahasiswa tidak ditemukan.
-      </p>
-    );
+    return <p className="text-center text-red-600">Data tidak ditemukan</p>;
   }
 
   return (
@@ -30,9 +48,17 @@ const MahasiswaDetail = () => {
             <td className="py-2 px-4 font-medium">NIM</td>
             <td className="py-2 px-4">{mahasiswa.nim}</td>
           </tr>
+
           <tr>
             <td className="py-2 px-4 font-medium">Nama</td>
             <td className="py-2 px-4">{mahasiswa.nama}</td>
+          </tr>
+
+          <tr>
+            <td className="py-2 px-4 font-medium">Status</td>
+            <td className="py-2 px-4">
+              {mahasiswa.status ? "Aktif" : "Tidak Aktif"}
+            </td>
           </tr>
         </tbody>
       </table>
