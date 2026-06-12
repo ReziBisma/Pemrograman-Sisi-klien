@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import Card from "@/Pages/Admin/Components/Card";
 import Heading from "@/Pages/Admin/Components/Heading";
 import Button from "@/Pages/Admin/Components/Button";
@@ -24,24 +24,31 @@ import {
 } from "@/Utils/Apis/MahasiswaApi";
 import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 
+import {
+  useMahasiswa,
+  useStoreMahasiswa,
+  useUpdateMahasiswa,
+  useDeleteMahasiswa,
+} from "@/Utils/Hooks/useMahasiswa";
+
+import { useKelas } from "@/Utils/Hooks/useKelas";
+import { useMataKuliah } from "@/Utils/Hooks/useMataKuliah";
+
 const Mahasiswa = () => {
   const { user } = useAuthStateContext();
-  const [mahasiswa, setMahasiswa] = useState([]);
+
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchMahasiswa();
-  }, []);
+  // Query
+  const { data: mahasiswa = [] } = useMahasiswa();
+  const { data: kelas = [] } = useKelas();
+  const { data: mataKuliah = [] } = useMataKuliah();
 
-  const fetchMahasiswa = async () => {
-    try {
-      const res = await getAllMahasiswa();
-      setMahasiswa(res.data);
-    } catch (error) {
-      toastError("Gagal mengambil data mahasiswa");
-    }
-  };
+  // Mutation
+  const { mutate: store } = useStoreMahasiswa();
+  const { mutate: update } = useUpdateMahasiswa();
+  const { mutate: remove } = useDeleteMahasiswa();
 
   const openAddModal = () => {
     setSelectedMahasiswa(null);
@@ -53,45 +60,41 @@ const Mahasiswa = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (formData) => {
-    try {
-      if (selectedMahasiswa) {
-        confirmUpdate(async () => {
-          try {
-            await updateMahasiswa(selectedMahasiswa.id, {
-              ...formData,
-              id: selectedMahasiswa.id,
-            });
+  const resetForm = () => {
+    setSelectedMahasiswa(null);
+    setIsModalOpen(false);
+  };
 
-            toastSuccess("Data mahasiswa berhasil diperbarui");
-            setIsModalOpen(false);
-            fetchMahasiswa();
-          } catch {
-            toastError("Data mahasiswa gagal diperbarui");
-          }
+  const handleSubmit = (form) => {
+    const isEdit = !!selectedMahasiswa;
+
+    if (isEdit) {
+      confirmUpdate(() => {
+        update({
+          id: form.id,
+          data: form,
         });
-      } else {
-        await storeMahasiswa(formData);
 
-        toastSuccess("Data mahasiswa berhasil ditambahkan");
-        setIsModalOpen(false);
-        fetchMahasiswa();
+        resetForm();
+      });
+    } else {
+      const exists = mahasiswa.find(
+        (m) => m.nim === form.nim
+      );
+
+      if (exists) {
+        toastError("NIM sudah terdaftar!");
+        return;
       }
-    } catch {
-      toastError("Terjadi kesalahan");
+
+      store(form);
+      resetForm();
     }
   };
 
   const handleDelete = (id) => {
-    confirmDelete(async () => {
-      try {
-        await deleteMahasiswa(id);
-
-        toastSuccess("Data mahasiswa berhasil dihapus");
-        fetchMahasiswa();
-      } catch {
-        toastError("Data mahasiswa gagal dihapus");
-      }
+    confirmDelete(() => {
+      remove(id);
     });
   };
 
@@ -103,14 +106,18 @@ const Mahasiswa = () => {
             Daftar Mahasiswa
           </Heading>
 
-          {user.permission.includes("mahasiswa.create") && (
-            <Button onClick={openAddModal}>+ Tambah Mahasiswa</Button>
+          {user?.permission?.includes("mahasiswa.create") && (
+            <Button onClick={openAddModal}>
+              + Tambah Mahasiswa
+            </Button>
           )}
         </div>
 
         {user?.permission?.includes("mahasiswa.read") && (
           <MahasiswaTable
             mahasiswa={mahasiswa}
+            kelas={kelas}
+            mataKuliah={mataKuliah}
             openEditModal={openEditModal}
             onDelete={handleDelete}
           />
@@ -122,6 +129,8 @@ const Mahasiswa = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
         selectedMahasiswa={selectedMahasiswa}
+        kelas={kelas}
+        mataKuliah={mataKuliah}
       />
     </>
   );
