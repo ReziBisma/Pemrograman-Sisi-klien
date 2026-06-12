@@ -1,4 +1,4 @@
-import { useState} from "react";
+import { useState } from "react";
 import Card from "@/Pages/Admin/Components/Card";
 import Heading from "@/Pages/Admin/Components/Heading";
 import Button from "@/Pages/Admin/Components/Button";
@@ -16,14 +16,7 @@ import {
   toastError,
 } from "@/Utils/Helpers/ToastHelpers";
 
-import {
-  getAllMahasiswa,
-  storeMahasiswa,
-  updateMahasiswa,
-  deleteMahasiswa,
-} from "@/Utils/Apis/MahasiswaApi";
 import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
-
 import {
   useMahasiswa,
   useStoreMahasiswa,
@@ -40,8 +33,28 @@ const Mahasiswa = () => {
   const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [search, setSearch] = useState("");
+
   // Query
-  const { data: mahasiswa = [] } = useMahasiswa();
+  const {
+    data: result = { data: [], total: 0 },
+    isLoading: isLoadingMahasiswa,
+  } = useMahasiswa({
+    q: search,
+    _sort: sortBy,
+    _order: sortOrder,
+    _page: page,
+    _limit: limit,
+  });
+
+  const mahasiswa = result.data;
+  const totalCount = result.total;
+  const totalPages = Math.ceil(totalCount / limit);
+
   const { data: kelas = [] } = useKelas();
   const { data: mataKuliah = [] } = useMataKuliah();
 
@@ -71,7 +84,7 @@ const Mahasiswa = () => {
     if (isEdit) {
       confirmUpdate(() => {
         update({
-          id: form.id,
+          id: selectedMahasiswa.id,
           data: form,
         });
 
@@ -91,11 +104,18 @@ const Mahasiswa = () => {
       resetForm();
     }
   };
-
   const handleDelete = (id) => {
     confirmDelete(() => {
       remove(id);
     });
+  };
+
+  const handlePrev = () => {
+    setPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNext = () => {
+    setPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   return (
@@ -113,14 +133,79 @@ const Mahasiswa = () => {
           )}
         </div>
 
-        {user?.permission?.includes("mahasiswa.read") && (
-          <MahasiswaTable
-            mahasiswa={mahasiswa}
-            kelas={kelas}
-            mataKuliah={mataKuliah}
-            openEditModal={openEditModal}
-            onDelete={handleDelete}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <input
+            type="text"
+            placeholder="Cari nama/NIM..."
+            className="border px-3 py-1 rounded flex-grow"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
+
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
+            className="border px-3 py-1 rounded"
+          >
+            <option value="name">Sort by Nama</option>
+            <option value="nim">Sort by NIM</option>
+            <option value="max_sks">Sort by Max SKS</option>
+          </select>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => {
+              setSortOrder(e.target.value);
+              setPage(1);
+            }}
+            className="border px-3 py-1 rounded"
+          >
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+          </select>
+        </div>
+
+        {user?.permission?.includes("mahasiswa.read") && (
+          <>
+            <MahasiswaTable
+              mahasiswa={mahasiswa}
+              kelas={kelas}
+              mataKuliah={mataKuliah}
+              openEditModal={openEditModal}
+              onDelete={handleDelete}
+              isLoading={isLoadingMahasiswa}
+            />
+
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-sm">
+                Halaman {page} dari {totalPages || 1}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  onClick={handlePrev}
+                  disabled={page === 1}
+                >
+                  Prev
+                </button>
+
+                <button
+                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  onClick={handleNext}
+                  disabled={page === totalPages || totalPages === 0}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </Card>
 
