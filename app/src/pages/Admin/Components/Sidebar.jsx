@@ -4,13 +4,6 @@ import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
 const Sidebar = () => {
   const { user } = useAuthStateContext();
 
-  {user.permission.includes("dashboard.page") && (
-    <NavLink to="/admin/dashboard">Dashboard</NavLink>
-  )}
-
-  {user.permission.includes("mahasiswa.page") && (
-    <NavLink to="/admin/mahasiswa">Mahasiswa</NavLink>
-  )}
   return (
     <aside className="bg-blue-800 text-white min-h-screen transition-all duration-300 w-20 lg:w-64">
       <div className="p-4 border-b border-blue-700">
@@ -28,6 +21,7 @@ const Sidebar = () => {
           <span>🏠</span>
           <span className="menu-text hidden lg:inline">Dashboard</span>
         </NavLink>
+
         <NavLink
           to="/admin/mahasiswa"
           className={({ isActive }) =>
@@ -39,6 +33,20 @@ const Sidebar = () => {
           <span>🎓</span>
           <span className="menu-text hidden lg:inline">Mahasiswa</span>
         </NavLink>
+
+        {user.permission.includes("rencana-studi.page") && (
+          <NavLink
+            to="/admin/rencana-studi"
+            className={({ isActive }) =>
+              `flex items-center space-x-2 px-4 py-2 rounded ${
+                isActive ? "bg-blue-700" : "hover:bg-blue-700"
+              }`
+            }
+          >
+            <span>📚</span>
+            <span className="menu-text hidden lg:inline">Rencana Studi</span>
+          </NavLink>
+        )}
       </nav>
     </aside>
   );

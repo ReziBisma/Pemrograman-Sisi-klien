@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "@/Pages/Admin/Components/Card";
 import Heading from "@/Pages/Admin/Components/Heading";
 import Button from "@/Pages/Admin/Components/Button";
@@ -26,6 +26,8 @@ import {
 
 import { useKelas } from "@/Utils/Hooks/useKelas";
 import { useMataKuliah } from "@/Utils/Hooks/useMataKuliah";
+import { getAllKelas } from "@/Utils/Apis/KelasApi";
+import { getAllMataKuliah } from "@/Utils/Apis/MataKuliahApi";
 
 const Mahasiswa = () => {
   const { user } = useAuthStateContext();
@@ -55,13 +57,29 @@ const Mahasiswa = () => {
   const totalCount = result.total;
   const totalPages = Math.ceil(totalCount / limit);
 
-  const { data: kelas = [] } = useKelas();
-  const { data: mataKuliah = [] } = useMataKuliah();
+   const [kelas, setKelas] = useState([]);
+  const [mataKuliah, setMataKuliah] = useState([]);
 
   // Mutation
   const { mutate: store } = useStoreMahasiswa();
   const { mutate: update } = useUpdateMahasiswa();
   const { mutate: remove } = useDeleteMahasiswa();
+
+
+  useEffect(() => {
+    setTimeout(() => fetchData(), 500);
+  }, []); 
+
+  const fetchData = async () => {
+  const [resKelas, resMahasiswa, resMataKuliah] = await Promise.all([
+    getAllKelas(),
+    getAllMahasiswa(),
+    getAllMataKuliah(),
+  ]);
+  setKelas(resKelas.data);
+  setMahasiswa(resMahasiswa.data);
+  setMataKuliah(resMataKuliah.data);
+};
 
   const openAddModal = () => {
     setSelectedMahasiswa(null);
@@ -103,6 +121,12 @@ const Mahasiswa = () => {
       store(form);
       resetForm();
     }
+  };
+  const getTotalSks = (mhsId) => {
+    return kelas
+      .filter(k => k.mahasiswa_ids.includes(mhsId))
+      .map(k => mataKuliah.find(mk => mk.id === k.mata_kuliah_id)?.sks || 0)
+      .reduce((a, b) => a + b, 0);
   };
   const handleDelete = (id) => {
     confirmDelete(() => {
@@ -177,6 +201,7 @@ const Mahasiswa = () => {
               mahasiswa={mahasiswa}
               kelas={kelas}
               mataKuliah={mataKuliah}
+              getTotalSks={getTotalSks} // passing props ke komponen table
               openEditModal={openEditModal}
               onDelete={handleDelete}
               isLoading={isLoadingMahasiswa}

@@ -21,6 +21,7 @@ import MahasiswaDetail from "@/Pages/Admin/MahasiswaDetail/MahasiswaDetail";
 import PageNotFound from "@/Pages/Error/PageNotFound";
 import { AuthProvider } from "@/Pages/Auth/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import RencanaStudi from "@/Pages/Admin/RencanaStudi/RencanaStudi";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
             element: <MahasiswaDetail />,
           },
         ],
+      },
+      {
+        path: "rencana-studi",
+        element: <RencanaStudi />,
       },
     ],
   },
