@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 import Card from "@/Pages/Admin/Components/Card";
 import Heading from "@/Pages/Admin/Components/Heading";
 import Button from "@/Pages/Admin/Components/Button";
@@ -12,11 +13,11 @@ import {
 } from "@/Utils/Helpers/SwalHelpers";
 
 import {
-  toastSuccess,
   toastError,
 } from "@/Utils/Helpers/ToastHelpers";
 
 import { useAuthStateContext } from "@/Pages/Auth/AuthContext";
+
 import {
   useMahasiswa,
   useStoreMahasiswa,
@@ -26,8 +27,6 @@ import {
 
 import { useKelas } from "@/Utils/Hooks/useKelas";
 import { useMataKuliah } from "@/Utils/Hooks/useMataKuliah";
-import { getAllKelas } from "@/Utils/Apis/KelasApi";
-import { getAllMataKuliah } from "@/Utils/Apis/MataKuliahApi";
 
 const Mahasiswa = () => {
   const { user } = useAuthStateContext();
@@ -36,12 +35,14 @@ const Mahasiswa = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit] = useState(5);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [search, setSearch] = useState("");
 
-  // Query
+  // ==========================
+  // QUERY MAHASISWA
+  // ==========================
   const {
     data: result = { data: [], total: 0 },
     isLoading: isLoadingMahasiswa,
@@ -53,34 +54,29 @@ const Mahasiswa = () => {
     _limit: limit,
   });
 
-  const mahasiswa = result.data;
-  const totalCount = result.total;
+  const mahasiswa = result?.data ?? [];
+  const totalCount = result?.total ?? 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-   const [kelas, setKelas] = useState([]);
-  const [mataKuliah, setMataKuliah] = useState([]);
+  // ==========================
+  // QUERY KELAS & MATA KULIAH
+  // ==========================
+  const { data: kelasData } = useKelas();
+  const kelas = kelasData?.data ?? [];
 
-  // Mutation
+  const { data: mataKuliahData } = useMataKuliah();
+  const mataKuliah = mataKuliahData?.data ?? [];
+
+  // ==========================
+  // MUTATION
+  // ==========================
   const { mutate: store } = useStoreMahasiswa();
   const { mutate: update } = useUpdateMahasiswa();
   const { mutate: remove } = useDeleteMahasiswa();
 
-
-  useEffect(() => {
-    setTimeout(() => fetchData(), 500);
-  }, []); 
-
-  const fetchData = async () => {
-  const [resKelas, resMahasiswa, resMataKuliah] = await Promise.all([
-    getAllKelas(),
-    getAllMahasiswa(),
-    getAllMataKuliah(),
-  ]);
-  setKelas(resKelas.data);
-  setMahasiswa(resMahasiswa.data);
-  setMataKuliah(resMataKuliah.data);
-};
-
+  // ==========================
+  // MODAL
+  // ==========================
   const openAddModal = () => {
     setSelectedMahasiswa(null);
     setIsModalOpen(true);
@@ -96,51 +92,92 @@ const Mahasiswa = () => {
     setIsModalOpen(false);
   };
 
+  // ==========================
+  // SUBMIT
+  // ==========================
   const handleSubmit = (form) => {
     const isEdit = !!selectedMahasiswa;
 
     if (isEdit) {
       confirmUpdate(() => {
-        update({
-          id: selectedMahasiswa.id,
-          data: form,
-        });
-
-        resetForm();
+        update(
+          {
+            id: selectedMahasiswa.id,
+            data: form,
+          },
+          {
+            onSuccess: () => {
+              resetForm();
+            },
+          }
+        );
       });
-    } else {
-      const exists = mahasiswa.find(
-        (m) => m.nim === form.nim
-      );
 
-      if (exists) {
-        toastError("NIM sudah terdaftar!");
-        return;
-      }
-
-      store(form);
-      resetForm();
+      return;
     }
+
+    const exists = mahasiswa.find(
+      (m) =>
+        m.nim?.toString().trim() ===
+        form.nim?.toString().trim()
+    );
+
+    if (exists) {
+      toastError("NIM sudah terdaftar!");
+      return;
+    }
+
+    store(form, {
+      onSuccess: () => {
+        resetForm();
+      },
+    });
   };
-  const getTotalSks = (mhsId) => {
-    return kelas
-      .filter(k => k.mahasiswa_ids.includes(mhsId))
-      .map(k => mataKuliah.find(mk => mk.id === k.mata_kuliah_id)?.sks || 0)
-      .reduce((a, b) => a + b, 0);
-  };
+
+  // ==========================
+  // DELETE
+  // ==========================
   const handleDelete = (id) => {
     confirmDelete(() => {
       remove(id);
     });
   };
 
+  // ==========================
+  // TOTAL SKS
+  // ==========================
+  const getTotalSks = (mhsId) => {
+    return kelas
+      .filter(
+        (k) =>
+          Array.isArray(k.mahasiswa_ids) &&
+          k.mahasiswa_ids.includes(mhsId)
+      )
+      .map(
+        (k) =>
+          mataKuliah.find(
+            (mk) => mk.id === k.mata_kuliah_id
+          )?.sks || 0
+      )
+      .reduce((a, b) => a + b, 0);
+  };
+
+  // ==========================
+  // PAGINATION
+  // ==========================
   const handlePrev = () => {
     setPage((prev) => Math.max(prev - 1, 1));
   };
 
   const handleNext = () => {
-    setPage((prev) => Math.min(prev + 1, totalPages));
+    setPage((prev) =>
+      Math.min(prev + 1, totalPages || 1)
+    );
   };
+
+  // DEBUG
+  console.log("result", result);
+  console.log("mahasiswa", mahasiswa);
 
   return (
     <>
@@ -201,7 +238,7 @@ const Mahasiswa = () => {
               mahasiswa={mahasiswa}
               kelas={kelas}
               mataKuliah={mataKuliah}
-              getTotalSks={getTotalSks} // passing props ke komponen table
+              getTotalSks={getTotalSks}
               openEditModal={openEditModal}
               onDelete={handleDelete}
               isLoading={isLoadingMahasiswa}
@@ -224,7 +261,9 @@ const Mahasiswa = () => {
                 <button
                   className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                   onClick={handleNext}
-                  disabled={page === totalPages || totalPages === 0}
+                  disabled={
+                    page === totalPages || totalPages === 0
+                  }
                 >
                   Next
                 </button>
