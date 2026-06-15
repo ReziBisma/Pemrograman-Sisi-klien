@@ -1,8 +1,5 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const db = require("../db.json");
-
-let data = JSON.parse(JSON.stringify(db)); // in-memory copy
 
 export default function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -11,12 +8,20 @@ export default function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const path = req.url.replace(/^\/api\//, "").split("?")[0].split("/");
-  const resource = path[0];
-  const id = path[1];
+  // Load fresh setiap request
+  const db = require("../db.json");
+  const data = JSON.parse(JSON.stringify(db));
+
+  const urlObj = new URL(req.url, "http://localhost");
+  const pathParts = urlObj.pathname.replace(/^\/api\//, "").split("/");
+  const resource = pathParts[0];
+  const id = pathParts[1];
+
+  console.log("resource:", resource);
+  console.log("keys in db:", Object.keys(data));
 
   if (!data[resource]) {
-    return res.status(404).json({ error: "Resource not found" });
+    return res.status(404).json({ error: `Resource '${resource}' not found`, keys: Object.keys(data) });
   }
 
   const collection = data[resource];
@@ -26,8 +31,8 @@ export default function handler(req, res) {
       const item = collection.find((i) => String(i.id) === String(id));
       return item ? res.json(item) : res.status(404).json({ error: "Not found" });
     }
-    // support query params (email, dll)
-    const query = req.query || {};
+
+    const query = Object.fromEntries(urlObj.searchParams.entries());
     let result = collection;
     for (const [key, val] of Object.entries(query)) {
       result = result.filter((i) => String(i[key]) === String(val));
@@ -37,22 +42,20 @@ export default function handler(req, res) {
 
   if (req.method === "POST") {
     const newItem = { ...req.body, id: String(Date.now()) };
-    data[resource].push(newItem);
     return res.status(201).json(newItem);
   }
 
   if (req.method === "PUT") {
     const idx = collection.findIndex((i) => String(i.id) === String(id));
     if (idx === -1) return res.status(404).json({ error: "Not found" });
-    data[resource][idx] = { ...collection[idx], ...req.body };
-    return res.json(data[resource][idx]);
+    const updated = { ...collection[idx], ...req.body };
+    return res.json(updated);
   }
 
   if (req.method === "DELETE") {
     const idx = collection.findIndex((i) => String(i.id) === String(id));
     if (idx === -1) return res.status(404).json({ error: "Not found" });
-    const deleted = data[resource].splice(idx, 1);
-    return res.json(deleted[0]);
+    return res.json(collection[idx]);
   }
 
   return res.status(405).json({ error: "Method not allowed" });
