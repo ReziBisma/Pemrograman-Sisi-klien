@@ -143,10 +143,10 @@
   ],
   "mahasiswa": [
     {
+      "id": "1",
+      "name": "Andi",
       "nim": "M001",
-      "nama": "sari22",
-      "status": true,
-      "id": "1"
+      "max_sks": 18
     },
     {
       "id": "2",
