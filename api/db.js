@@ -1,5 +1,19 @@
 import { createRequire } from "module";
+import { readFileSync, readdirSync } from "fs";
+import { join, basename } from "path";
+
 const require = createRequire(import.meta.url);
+
+function loadDb() {
+  const dbFolder = join(process.cwd(), "db");
+  const files = readdirSync(dbFolder).filter((f) => f.endsWith(".json"));
+  const combined = {};
+  files.forEach((file) => {
+    const key = basename(file, ".json");
+    combined[key] = JSON.parse(readFileSync(join(dbFolder, file), "utf-8"));
+  });
+  return combined;
+}
 
 export default function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -8,20 +22,15 @@ export default function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // Load fresh setiap request
-  const db = require("../db.json");
-  const data = JSON.parse(JSON.stringify(db));
+  const data = loadDb();
 
   const urlObj = new URL(req.url, "http://localhost");
   const pathParts = urlObj.pathname.replace(/^\/api\//, "").split("/");
   const resource = pathParts[0];
   const id = pathParts[1];
 
-  console.log("resource:", resource);
-  console.log("keys in db:", Object.keys(data));
-
   if (!data[resource]) {
-    return res.status(404).json({ error: `Resource '${resource}' not found`, keys: Object.keys(data) });
+    return res.status(404).json({ error: `Resource '${resource}' not found` });
   }
 
   const collection = data[resource];
@@ -31,7 +40,6 @@ export default function handler(req, res) {
       const item = collection.find((i) => String(i.id) === String(id));
       return item ? res.json(item) : res.status(404).json({ error: "Not found" });
     }
-
     const query = Object.fromEntries(urlObj.searchParams.entries());
     let result = collection;
     for (const [key, val] of Object.entries(query)) {
@@ -48,8 +56,7 @@ export default function handler(req, res) {
   if (req.method === "PUT") {
     const idx = collection.findIndex((i) => String(i.id) === String(id));
     if (idx === -1) return res.status(404).json({ error: "Not found" });
-    const updated = { ...collection[idx], ...req.body };
-    return res.json(updated);
+    return res.json({ ...collection[idx], ...req.body });
   }
 
   if (req.method === "DELETE") {
