@@ -1,4 +1,6 @@
-import db from "../db.json" assert { type: "json" };
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const db = require("../db.json");
 
 let data = JSON.parse(JSON.stringify(db)); // in-memory copy
 
