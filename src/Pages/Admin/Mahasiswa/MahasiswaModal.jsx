@@ -12,22 +12,24 @@ const MahasiswaModal = ({
 }) => {
   const [form, setForm] = useState({
     nim: "",
-    nama: "",
+    name: "",
     status: true,
   });
 
-  // isi form saat edit / reset saat tambah
   useEffect(() => {
     if (selectedMahasiswa) {
       setForm({
         nim: selectedMahasiswa.nim || "",
-        nama: selectedMahasiswa.nama || "",
+        name:
+          selectedMahasiswa.name ||
+          selectedMahasiswa.nama ||
+          "",
         status: selectedMahasiswa.status ?? true,
       });
     } else {
       setForm({
         nim: "",
-        nama: "",
+        name: "",
         status: true,
       });
     }
@@ -38,14 +40,20 @@ const MahasiswaModal = ({
 
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.nim.trim() || !form.nama.trim()) {
+    if (
+      !form.nim.trim() ||
+      !form.name.trim()
+    ) {
       toastError("Data belum lengkap");
       return;
     }
@@ -62,7 +70,9 @@ const MahasiswaModal = ({
         {/* HEADER */}
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-semibold">
-            {selectedMahasiswa ? "Edit Mahasiswa" : "Tambah Mahasiswa"}
+            {selectedMahasiswa
+              ? "Edit Mahasiswa"
+              : "Tambah Mahasiswa"}
           </h2>
 
           <button
@@ -74,11 +84,17 @@ const MahasiswaModal = ({
         </div>
 
         {/* FORM */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 space-y-4"
+        >
 
           {/* NIM */}
           <div>
-            <Label htmlFor="nim">NIM</Label>
+            <Label htmlFor="nim">
+              NIM
+            </Label>
+
             <Input
               type="text"
               name="nim"
@@ -91,11 +107,14 @@ const MahasiswaModal = ({
 
           {/* NAMA */}
           <div>
-            <Label htmlFor="nama">Nama</Label>
+            <Label htmlFor="name">
+              Nama
+            </Label>
+
             <Input
               type="text"
-              name="nama"
-              value={form.nama}
+              name="name"
+              value={form.name}
               onChange={handleChange}
               placeholder="Masukkan Nama"
             />
@@ -104,6 +123,7 @@ const MahasiswaModal = ({
           {/* STATUS */}
           <div>
             <Label>Status</Label>
+
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="checkbox"
@@ -111,13 +131,22 @@ const MahasiswaModal = ({
                 checked={form.status}
                 onChange={handleChange}
               />
-              <span>{form.status ? "Aktif" : "Tidak Aktif"}</span>
+
+              <span>
+                {form.status
+                  ? "Aktif"
+                  : "Tidak Aktif"}
+              </span>
             </div>
           </div>
 
           {/* BUTTON */}
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+            >
               Batal
             </Button>
 
