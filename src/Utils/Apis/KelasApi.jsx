@@ -3,15 +3,6 @@ import axios from "@/Utils/AxiosInstance";
 // Ambil semua kelas
 export const getAllKelas = async () => {
   const res = await axios.get("/kelas.json");
-  const data = res.data
-    ? Object.entries(res.data).map(([firebaseId, val]) => ({ ...val, firebaseId }))
-    : [];
-  return { data };
-};
-
-// Ambil 1 kelas
-export const getAllKelas = async () => {
-  const res = await axios.get("/kelas.json");
 
   const data = res.data
     ? Object.entries(res.data).map(
@@ -26,6 +17,14 @@ export const getAllKelas = async () => {
     : [];
 
   return { data };
+};
+
+// Ambil 1 kelas
+export const getKelas = async (id) => {
+  const res = await axios.get("/kelas.json");
+  const all = res.data ? Object.entries(res.data).map(([firebaseId, val]) => ({ ...val, firebaseId })) : [];
+  const found = all.find((k) => k.id === id);
+  return { data: found };
 };
 
 // Tambah kelas
