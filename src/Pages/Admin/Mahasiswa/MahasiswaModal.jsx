@@ -24,12 +24,14 @@ const MahasiswaModal = ({
           selectedMahasiswa.name ||
           selectedMahasiswa.nama ||
           "",
+        max_sks: selectedMahasiswa.max_sks || 18,
         status: selectedMahasiswa.status ?? true,
-      });
+            });
     } else {
       setForm({
-        nim: "",
+         nim: "",
         name: "",
+        max_sks: 18,
         status: true,
       });
     }
