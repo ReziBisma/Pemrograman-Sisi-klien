@@ -14,27 +14,47 @@ export const useMahasiswa = (query = {}) =>
     queryFn: async () => {
       const res = await getAllMahasiswa();
 
-      const data = (res.data || []).map(
-        (item) => ({
-          firebaseKey: item.firebaseId,
-          id:
-            item.id ||
-            item.firebaseId,
-          name:
-            item.name ||
-            item.nama ||
-            "",
-          nim: item.nim || "",
-          max_sks:
-            item.max_sks || 0,
-          status:
-            item.status ?? true,
-        })
-      );
+      let data = res.data || [];
+
+      // SEARCH
+      if (query.q) {
+        const keyword = query.q.toLowerCase();
+
+        data = data.filter(
+          (m) =>
+            m.name?.toLowerCase().includes(keyword) ||
+            m.nim?.toLowerCase().includes(keyword)
+        );
+      }
+
+      // SORT
+      if (query._sort) {
+        data.sort((a, b) => {
+          const aValue = a[query._sort];
+          const bValue = b[query._sort];
+
+          if (query._order === "desc") {
+            return aValue > bValue ? -1 : 1;
+          }
+
+          return aValue > bValue ? 1 : -1;
+        });
+      }
+
+      const total = data.length;
+
+      // PAGINATION
+      const page = query._page || 1;
+      const limit = query._limit || 5;
+
+      const start = (page - 1) * limit;
+      const end = start + limit;
+
+      data = data.slice(start, end);
 
       return {
         data,
-        total: data.length,
+        total,
       };
     },
 
