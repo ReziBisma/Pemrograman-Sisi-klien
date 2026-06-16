@@ -10,20 +10,21 @@ import { toastSuccess, toastError } from "@/Utils/Helpers/ToastHelpers";
 export const useMahasiswa = (query = {}) =>
   useQuery({
     queryKey: ["mahasiswa", query],
-    queryFn: async () => {
-      const res = await getAllMahasiswa(query);
+   queryFn: async () => {
+    const res = await getAllMahasiswa(query);
 
-      return {
-        data: Array.isArray(res.data)
-          ? res.data
-          : res.data?.data ?? [],
-        total: Number(
-          res.headers["x-total-count"] ??
-          res.data?.total ??
-          0
-        ),
-      };
-    },
+    const data = Object.entries(res.data || {}).map(
+      ([firebaseKey, value]) => ({
+        firebaseKey,
+        ...value,
+      })
+    );
+
+    return {
+      data,
+      total: data.length,
+    };
+  },
     keepPreviousData: true,
   });
 
