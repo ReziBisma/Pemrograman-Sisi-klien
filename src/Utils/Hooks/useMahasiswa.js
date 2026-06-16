@@ -10,45 +10,47 @@ import { toastSuccess, toastError } from "@/Utils/Helpers/ToastHelpers";
 export const useMahasiswa = (query = {}) =>
   useQuery({
     queryKey: ["mahasiswa", query],
-
     queryFn: async () => {
       const res = await getAllMahasiswa();
 
-      let data = res.data || [];
+      let data = [...res.data];
 
       // SEARCH
       if (query.q) {
-        const keyword = query.q.toLowerCase();
-
         data = data.filter(
           (m) =>
-            m.name?.toLowerCase().includes(keyword) ||
-            m.nim?.toLowerCase().includes(keyword)
+            m.name
+              ?.toLowerCase()
+              .includes(query.q.toLowerCase()) ||
+            m.nim
+              ?.toLowerCase()
+              .includes(query.q.toLowerCase())
         );
       }
 
       // SORT
       if (query._sort) {
         data.sort((a, b) => {
-          const aValue = a[query._sort];
-          const bValue = b[query._sort];
+          const aVal = a[query._sort];
+          const bVal = b[query._sort];
 
           if (query._order === "desc") {
-            return aValue > bValue ? -1 : 1;
+            return aVal > bVal ? -1 : 1;
           }
 
-          return aValue > bValue ? 1 : -1;
+          return aVal > bVal ? 1 : -1;
         });
       }
 
       const total = data.length;
 
       // PAGINATION
-      const page = query._page || 1;
-      const limit = query._limit || 5;
+      const start =
+        ((query._page || 1) - 1) *
+        (query._limit || total);
 
-      const start = (page - 1) * limit;
-      const end = start + limit;
+      const end =
+        start + (query._limit || total);
 
       data = data.slice(start, end);
 
@@ -57,8 +59,6 @@ export const useMahasiswa = (query = {}) =>
         total,
       };
     },
-
-    keepPreviousData: true,
   });
 
 export const useStoreMahasiswa = () => {

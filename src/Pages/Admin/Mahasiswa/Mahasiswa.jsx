@@ -36,7 +36,7 @@ const Mahasiswa = () => {
 
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("nim");
   const [sortOrder, setSortOrder] = useState("asc");
   const [search, setSearch] = useState("");
 
