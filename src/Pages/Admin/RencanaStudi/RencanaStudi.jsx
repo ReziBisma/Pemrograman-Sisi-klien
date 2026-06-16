@@ -57,7 +57,11 @@ const handleAddMahasiswa = async (kelasItem, mhsId) => {
   const sks = matkul?.sks || 0;
 
   const totalSksMahasiswa = kelas
-    .filter(k => k.mahasiswa_ids.includes(mhsId))
+    .filter(
+      k =>
+        Array.isArray(k.mahasiswa_ids) &&
+        k.mahasiswa_ids.includes(mhsId)
+    )
     .map(k => mataKuliah.find(m => m.id === k.mata_kuliah_id)?.sks || 0)
     .reduce((acc, curr) => acc + curr, 0);
 
@@ -68,7 +72,10 @@ const handleAddMahasiswa = async (kelasItem, mhsId) => {
     return;
   }
 
-  if (kelasItem.mahasiswa_ids.includes(mhsId)) {
+  if (
+    Array.isArray(kelasItem.mahasiswa_ids) &&
+    kelasItem.mahasiswa_ids.includes(mhsId)
+  ) {
     toastError("Mahasiswa sudah terdaftar");
     return;
   }

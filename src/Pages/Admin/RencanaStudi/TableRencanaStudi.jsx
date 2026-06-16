@@ -22,7 +22,9 @@ export default function TableRencanaStudi({
       {kelas.map((kls) => {
         const matkul = mataKuliah.find(m => m.id === kls.mata_kuliah_id);
         const dosenPengampu = dosen.find(d => d.id === kls.dosen_id);
-        const mhsInClass = kls.mahasiswa_ids.map(id => mahasiswa.find(m => m.id === id)).filter(Boolean);
+        const mhsInClass = (kls.mahasiswa_ids || [])
+          .map(id => mahasiswa.find(m => m.id === id))
+          .filter(Boolean);
 
         return (
           <div key={kls.id} className="border rounded shadow bg-white">
@@ -66,7 +68,11 @@ export default function TableRencanaStudi({
                 {mhsInClass.length > 0 ? (
                   mhsInClass.map((m, i) => {
                     const totalSks = kelas
-                      .filter(k => k.mahasiswa_ids.includes(m.id))
+                      .filter(
+                        k =>
+                          Array.isArray(k.mahasiswa_ids) &&
+                          k.mahasiswa_ids.includes(m.id)
+                      )
                       .map(k => mataKuliah.find(mk => mk.id === k.mata_kuliah_id)?.sks || 0)
                       .reduce((a, b) => a + b, 0);
 

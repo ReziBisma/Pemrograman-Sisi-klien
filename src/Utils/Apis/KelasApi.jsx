@@ -10,15 +10,46 @@ export const getAllKelas = async () => {
 };
 
 // Ambil 1 kelas
-export const getKelas = async (id) => {
+export const getAllKelas = async () => {
   const res = await axios.get("/kelas.json");
-  const all = res.data ? Object.entries(res.data).map(([firebaseId, val]) => ({ ...val, firebaseId })) : [];
-  const found = all.find((k) => k.id === id);
-  return { data: found };
+
+  const data = res.data
+    ? Object.entries(res.data).map(
+        ([firebaseId, val]) => ({
+          firebaseId,
+          id: val.id ?? firebaseId,
+          mata_kuliah_id: val.mata_kuliah_id || "",
+          dosen_id: val.dosen_id || "",
+          mahasiswa_ids: val.mahasiswa_ids || [],
+        })
+      )
+    : [];
+
+  return { data };
 };
 
 // Tambah kelas
-export const storeKelas = (data) => axios.post("/kelas.json", data);
+export const storeKelas = async (data) => {
+  const res = await axios.get("/kelas.json");
+
+  const kelas = res.data
+    ? Object.values(res.data)
+    : [];
+
+  const maxId = Math.max(
+    0,
+    ...kelas.map((k) => Number(k.id) || 0)
+  );
+
+  const newData = {
+    id: String(maxId + 1),
+    mata_kuliah_id: data.mata_kuliah_id,
+    dosen_id: data.dosen_id,
+    mahasiswa_ids: data.mahasiswa_ids || [],
+  };
+
+  return axios.post("/kelas.json", newData);
+};
 
 // Update kelas
 export const updateKelas = async (id, data) => {
@@ -27,7 +58,10 @@ export const updateKelas = async (id, data) => {
   const entry = entries.find(([, val]) => val.id === id);
   if (!entry) throw new Error("Kelas tidak ditemukan");
   const [firebaseId] = entry;
-  return axios.put(`/kelas/${firebaseId}.json`, data);
+  return axios.put(`/kelas/${firebaseId}.json`, {
+    ...data,
+    mahasiswa_ids: data.mahasiswa_ids || [],
+  });
 };
 
 // Hapus kelas
