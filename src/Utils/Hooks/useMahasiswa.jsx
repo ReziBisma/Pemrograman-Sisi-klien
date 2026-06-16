@@ -9,11 +9,18 @@ import {
 import { toastSuccess, toastError } from "@/Utils/Helpers/ToastHelpers";
 
 // Ambil semua mahasiswa
-export const useMahasiswa = () =>
+export const useMahasiswa = (params = {}) =>
   useQuery({
-    queryKey: ["mahasiswa"],
-    queryFn: getAllMahasiswa,
-    select: (res) => res?.data ?? [],
+    queryKey: ["mahasiswa", params],
+    queryFn: () => getAllMahasiswa(params),
+    select: (res) => {
+      const body = res?.data;
+      // json-server v1: { data: [...], total: N }
+      if (Array.isArray(body?.data)) return body.data;
+      // json-server v0: langsung array
+      if (Array.isArray(body)) return body;
+      return [];
+    },
   });
 
 // Tambah
