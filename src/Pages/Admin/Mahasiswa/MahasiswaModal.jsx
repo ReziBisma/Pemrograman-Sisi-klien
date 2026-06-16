@@ -11,10 +11,11 @@ const MahasiswaModal = ({
   selectedMahasiswa,
 }) => {
   const [form, setForm] = useState({
-    nim: "",
-    name: "",
-    status: true,
-  });
+  nim: "",
+  name: "",
+  max_sks: 18,
+  status: true,
+});
 
   useEffect(() => {
     if (selectedMahasiswa) {
@@ -37,29 +38,31 @@ const MahasiswaModal = ({
     }
   }, [selectedMahasiswa, isModalOpen]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+ const handleChange = (e) => {
+  const { name, value, type, checked } = e.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value,
-    }));
-  };
+  setForm((prev) => ({
+    ...prev,
+    [name]:
+      type === "checkbox"
+        ? checked
+        : name === "max_sks"
+        ? Number(value)
+        : value,
+  }));
+};
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (
       !form.nim.trim() ||
-      !form.name.trim()
+      !form.name.trim() ||
+      !form.max_sks
     ) {
       toastError("Data belum lengkap");
       return;
     }
-
     onSubmit(form);
   };
 
@@ -107,40 +110,57 @@ const MahasiswaModal = ({
             />
           </div>
 
-          {/* NAMA */}
-          <div>
-            <Label htmlFor="name">
-              Nama
-            </Label>
+         {/* NAMA */}
+        <div>
+          <Label htmlFor="name">
+            Nama
+          </Label>
 
-            <Input
-              type="text"
-              name="name"
-              value={form.name}
+          <Input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Masukkan Nama"
+          />
+        </div>
+
+        {/* MAX SKS */}
+        <div>
+          <Label htmlFor="max_sks">
+            Max SKS
+          </Label>
+
+          <Input
+            type="number"
+            name="max_sks"
+            value={form.max_sks}
+            onChange={handleChange}
+            min="1"
+            max="24"
+            placeholder="Masukkan Max SKS"
+          />
+        </div>
+
+        {/* STATUS */}
+        <div>
+          <Label>Status</Label>
+
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              type="checkbox"
+              name="status"
+              checked={form.status}
               onChange={handleChange}
-              placeholder="Masukkan Nama"
             />
+
+            <span>
+              {form.status
+                ? "Aktif"
+                : "Tidak Aktif"}
+            </span>
           </div>
-
-          {/* STATUS */}
-          <div>
-            <Label>Status</Label>
-
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                name="status"
-                checked={form.status}
-                onChange={handleChange}
-              />
-
-              <span>
-                {form.status
-                  ? "Aktif"
-                  : "Tidak Aktif"}
-              </span>
-            </div>
-          </div>
+        </div>
 
           {/* BUTTON */}
           <div className="flex justify-end space-x-2">

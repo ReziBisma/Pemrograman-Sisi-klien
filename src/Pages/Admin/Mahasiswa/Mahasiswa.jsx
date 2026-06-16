@@ -96,6 +96,7 @@ const Mahasiswa = () => {
   // SUBMIT
   // ==========================
   const handleSubmit = (form) => {
+    console.log("FORM SUBMIT =", form);
     const isEdit = !!selectedMahasiswa;
 
     if (isEdit) {
